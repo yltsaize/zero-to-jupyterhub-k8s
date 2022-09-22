@@ -1,4 +1,4 @@
-FROM jupyter/base-notebook:latest
+FROM jupyter/base-notebook:ubuntu-20.04
 # Built from... https://hub.docker.com/r/jupyter/base-notebook/
 #               https://github.com/jupyter/docker-stacks/blob/HEAD/base-notebook/Dockerfile
 # Built from... Ubuntu 20.04
@@ -16,7 +16,47 @@ RUN apt-get update \
         dnsutils \
         git \
         iputils-ping \
+        curl \
+        fzf \
+        fzy \
+        tmux \
+        tree \
+        htop \
+        iftop \
+        tig \
+        silversearcher-ag \
+        npm \
  && rm -rf /var/lib/apt/lists/*
+
+# nats
+RUN npm install -g nats-cli
+
+# jq
+RUN curl -sLo ./jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
+    && chmod +x ./jq \
+    && mv ./jq /usr/local/bin
+
+# yq
+RUN curl -sLo ./yq.tar.gz https://github.com/mikefarah/yq/releases/download/v4.27.2/yq_linux_amd64.tar.gz \
+    && tar -zxf yq.tar.gz ./yq_linux_amd64 \
+    && mv yq_linux_amd64 /usr/local/bin/yq \
+    && rm -f yq.tar.gz
+
+# kubectl
+RUN curl -sLO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl \
+    && chmod +x ./kubectl \
+    && mv ./kubectl /usr/local/bin/
+
+# helm
+RUN curl -sLo ./helm.tar.gz https://get.helm.sh/helm-v3.9.3-linux-amd64.tar.gz \
+    && tar -zxvf helm.tar.gz linux-amd64/helm \
+    --strip-components 1 && mv ./helm /usr/local/bin/ \
+    && rm ./helm.tar.gz
+
+#k9s
+RUN curl -sS https://webinstall.dev/k9s | bash
+# RUN source ~/.config/envman/PATH.env
+
 USER $NB_USER
 
 COPY requirements.txt /tmp/requirements.txt
