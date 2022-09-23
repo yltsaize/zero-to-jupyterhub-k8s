@@ -11,8 +11,8 @@ FROM jupyter/base-notebook:ubuntu-20.04
 # NOTE: git is already available in the jupyter/minimal-notebook image.
 USER root
 RUN apt-get update \
- && apt-get upgrade -y \
- && apt-get install -y --no-install-recommends \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
         dnsutils \
         git \
         iputils-ping \
@@ -25,11 +25,14 @@ RUN apt-get update \
         iftop \
         tig \
         silversearcher-ag \
-        npm \
- && rm -rf /var/lib/apt/lists/*
+        unzip \
+    && rm -rf /var/lib/apt/lists/*
 
 # nats
-RUN npm install -g nats-cli
+RUN curl -sLo nats.zip https://github.com/nats-io/natscli/releases/download/v0.0.34/nats-0.0.34-linux-amd64.zip \
+    && unzip nats.zip \
+    && mv nats-0.0.34-linux-amd64/nats /usr/local/bin \
+    && rm -rf nats-0.0.34-linux-amd64 nats.zip
 
 # jq
 RUN curl -sLo ./jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
@@ -56,6 +59,12 @@ RUN curl -sLo ./helm.tar.gz https://get.helm.sh/helm-v3.9.3-linux-amd64.tar.gz \
 #k9s
 RUN curl -sS https://webinstall.dev/k9s | bash
 # RUN source ~/.config/envman/PATH.env
+
+# vault
+RUN curl -sLo vault.zip https://releases.hashicorp.com/vault/1.7.10/vault_1.7.10_linux_amd64.zip \
+    && unzip vault.zip \
+    && mv ./vault /usr/local/bin/ \
+    && rm vault.zip
 
 USER $NB_USER
 
